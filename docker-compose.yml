@@ -1,0 +1,67 @@
+services:
+  api: &main_app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: weather:${WEATHER_VERSION:-latest}
+    restart: always
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      WEATHER_HOST: 0.0.0.0
+      WEATHER_DB_HOST: weather-db
+      WEATHER_DB_PORT: 5432
+      WEATHER_DB_USER: weather
+      WEATHER_DB_PASS: weather
+      WEATHER_DB_BASE: weather
+      WEATHER_REDIS_HOST: weather-redis
+
+  db:
+    image: postgres:18.1-bookworm
+    hostname: weather-db
+    environment:
+      POSTGRES_PASSWORD: "weather"
+      POSTGRES_USER: "weather"
+      POSTGRES_DB: "weather"
+    volumes:
+      - weather-db-data:/var/lib/postgresql
+    restart: always
+    healthcheck:
+      test: pg_isready -U weather
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    <<: *main_app
+    restart: "no"
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: redis:8.4.0
+    hostname: "weather-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  weather-db-data:
+    name: weather-db-data
