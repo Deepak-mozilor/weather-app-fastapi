@@ -5,11 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import UJSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from weather.web.api.geocode import router as geocode_router
-from weather.web.api.login import router as login_router
-from weather.web.api.report import router as report_router
-from weather.web.api.router import api_router
-from weather.web.api.sign_up import router as signup_router
+from weather.web.api.view.router import api_router
 from weather.web.lifespan import lifespan_setup
 
 APP_ROOT = Path(__file__).parent.parent
@@ -45,10 +41,6 @@ def get_app() -> FastAPI:
     )
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")
-    app.include_router(geocode_router)
-    app.include_router(report_router)
-    app.include_router(login_router)
-    app.include_router(signup_router)
 
     # Adds static directory.
     # This directory is used to access swagger files.

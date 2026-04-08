@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from weather.db.dependencies import get_db_session
 from weather.db.models.weather_model import WeatherData
-from weather.web.api.login import verify_user_cookie
+from weather.web.api.view.login.login import verify_user_cookie
 
 router = APIRouter()
 

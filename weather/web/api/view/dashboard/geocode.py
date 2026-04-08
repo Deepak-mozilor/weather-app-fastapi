@@ -5,9 +5,9 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from weather.db.dependencies import get_db_session
-from weather.web.api.login import verify_user_cookie
+from weather.web.api.view.login.login import verify_user_cookie
 
-from ...db.models.weather_model import WeatherData
+from .....db.models.weather_model import WeatherData
 
 __all__ = ["WeatherData"]
 
@@ -47,7 +47,10 @@ async def addtodb(
 
     clean_city_name = location.city.split(",")[0].strip().title()
 
-    query = select(WeatherData).where(WeatherData.city == clean_city_name)
+    query = select(WeatherData).where(
+        WeatherData.city == clean_city_name,
+        WeatherData.user == str(user_id)
+    )
     result = await db.execute(query)
     existing_city = result.scalars().first()
 
@@ -73,6 +76,7 @@ async def addtodb(
             feels=current.get("apparent_temperature"),
             wind=current.get("wind_speed_10m"),
             code=current.get("weather_code"),
+            user=str(user_id)
         )
 
         db.add(new_entry)
@@ -128,7 +132,7 @@ async def clear_db(
     user_id: int = Depends(verify_user_cookie),
 ):
     try:
-        query = delete(WeatherData)
+        query = delete(WeatherData).where(WeatherData.user == str(user_id))
 
         await db.execute(query)
         await db.commit()
@@ -146,7 +150,7 @@ async def get_my_cities(
     user_id: int = Depends(verify_user_cookie),
 ):
     try:
-        query = select(WeatherData)
+        query = select(WeatherData).where(WeatherData.user == str(user_id))
         result = await db.execute(query)
         saved_cities = result.scalars().all()
 
