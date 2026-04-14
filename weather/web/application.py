@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import UJSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from weather.web.api.view.router import api_router
+from weather.web.api.router import api_router
 from weather.web.lifespan import lifespan_setup
 
 APP_ROOT = Path(__file__).parent.parent
@@ -33,6 +33,7 @@ def get_app() -> FastAPI:
         allow_origins=[
             "http://127.0.0.1:5501",
             "http://localhost:5501",
+            "http://localhost:5502",
             "http://127.0.0.1:5502",
         ],
         allow_credentials=True,

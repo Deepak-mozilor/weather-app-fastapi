@@ -11,7 +11,7 @@ class WeatherData(Base):
     __tablename__ = "weather_data"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
-    user: Mapped[str] = mapped_column(String(length=200),nullable=False)
+    user: Mapped[str] = mapped_column(String(length=200), nullable=False)
     time: Mapped[str] = mapped_column(String(length=200))
     city: Mapped[str] = mapped_column(String(length=200), nullable=False)
     temperature: Mapped[float] = mapped_column(Float)
@@ -22,6 +22,4 @@ class WeatherData(Base):
     longitude: Mapped[float] = mapped_column(Float, nullable=True)
     latitude: Mapped[float] = mapped_column(Float, nullable=True)
 
-    __table_args__ = (
-        UniqueConstraint("user", "city", name="uq_user_city"),
-    )
+    __table_args__ = (UniqueConstraint("user", "city", name="uq_user_city"),)

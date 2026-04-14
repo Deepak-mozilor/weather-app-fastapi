@@ -1,38 +1,31 @@
+from typing import Any
+
 import bcrypt
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel, EmailStr
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from weather.db.dependencies import get_db_session
-from weather.db.models.user_model import User
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    username: str
-    password: str
-
+from weather.db.dao.user_dao import UserDAO
+from weather.web.api.signup.schema import UserLogin
 
 router = APIRouter()
 
 
 @router.post("/signup")
-async def sign_up(user: UserLogin, db: AsyncSession = Depends(get_db_session)):
+async def sign_up(user: UserLogin, user_dao: UserDAO = Depends()) -> dict[str, Any]:
+    """Route function for signup logic."""
 
-    new_entry = User(
+    hashed_pwd = hashed(user.password)
+
+    new_entry = await user_dao.create_user(
         email=user.email,
         username=user.username,
-        hashed_password=hashed(user.password),
+        hashed_password=hashed_pwd,
     )
-
-    db.add(new_entry)
-    await db.commit()
-    await db.refresh(new_entry)
 
     return {"message": "User created successfully", "user_id": new_entry.id}
 
 
 def hashed(password: str) -> str:
+    """Convert password to hash."""
     pwd_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(pwd_bytes, salt)
@@ -40,6 +33,7 @@ def hashed(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify password with encypted password."""
     pwd_bytes = plain_password.encode("utf-8")
     hash_bytes = hashed_password.encode("utf-8")
     return bcrypt.checkpw(pwd_bytes, hash_bytes)
