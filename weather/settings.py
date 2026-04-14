@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     workers_count: int = 1
     # Enable uvicorn reloading
     reload: bool = False
-    secret_key: str = ""
+    secret_key: str = "dsjufhewufhcousdhnf38ey23uhd"
     # Current environment
     environment: str = "dev"
 

@@ -5,7 +5,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from weather.db.dependencies import get_db_session
-from weather.db.models.weather_data import WeatherData
+from weather.db.models.weather_data_model import WeatherData
 
 
 class WeatherDAO:
@@ -23,11 +23,9 @@ class WeatherDAO:
         weather_data: dict[str, Any],
     ) -> tuple[WeatherData, str]:
         """Updates a city's weather if it exists, or inserts a new one."""
-        user_str = str(user_id)
 
-        # 1. Check if city already exists for this user
         query = select(WeatherData).where(
-            WeatherData.city == city, WeatherData.user == user_str
+            WeatherData.city == city, WeatherData.user_id == user_id
         )
         result = await self.session.execute(query)
         existing_city = result.scalars().first()
@@ -44,18 +42,17 @@ class WeatherDAO:
             action = "updated"
             db_entry = existing_city
         else:
-            # Create new
             db_entry = WeatherData(
-                time=weather_data.get("time"),
+                time=str(weather_data.get("time", "")),
                 city=city,
                 latitude=lat,
                 longitude=lon,
-                temperature=weather_data.get("temperature_2m"),
-                humidity=weather_data.get("relative_humidity_2m"),
-                feels=weather_data.get("apparent_temperature"),
-                wind=weather_data.get("wind_speed_10m"),
-                code=weather_data.get("weather_code"),
-                user=user_str,
+                temperature=float(weather_data.get("temperature_2m", 0.0)),
+                humidity=int(weather_data.get("relative_humidity_2m", 0)),
+                feels=float(weather_data.get("apparent_temperature", 0.0)),
+                wind=int(weather_data.get("wind_speed_10m", 0)),
+                code=int(weather_data.get("weather_code", 0)),
+                user_id=user_id,
             )
             self.session.add(db_entry)
             action = "added"
@@ -67,13 +64,13 @@ class WeatherDAO:
 
     async def get_user_cities(self, user_id: int) -> list[WeatherData]:
         """Fetches all saved cities for a specific user."""
-        query = select(WeatherData).where(WeatherData.user == str(user_id))
+        query = select(WeatherData).where(WeatherData.user_id == user_id)
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
     async def clear_user_cities(self, user_id: int) -> None:
         """Deletes all saved cities for a specific user."""
-        query = delete(WeatherData).where(WeatherData.user == str(user_id))
+        query = delete(WeatherData).where(WeatherData.user_id == user_id)
         await self.session.execute(query)
         await self.session.commit()
 

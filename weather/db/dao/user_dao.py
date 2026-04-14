@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from weather.db.dependencies import get_db_session
-from weather.db.models.user import User
+from weather.db.models.user_model import User
 
 
 class UserDAO:

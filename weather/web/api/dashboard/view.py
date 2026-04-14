@@ -4,7 +4,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 
 from weather.db.dao.weather_data_dao import WeatherDAO
-from weather.db.models.weather_data import WeatherData
+from weather.db.models.weather_data_model import WeatherData
 from weather.web.api.dashboard.schema import CityLocation, WeatherDataResponse
 from weather.web.api.login.view import verify_user_cookie
 

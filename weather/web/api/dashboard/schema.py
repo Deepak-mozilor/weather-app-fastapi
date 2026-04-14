@@ -13,7 +13,7 @@ class WeatherDataResponse(BaseModel):
     """Response model for /my-cities."""
 
     id: int
-    user: str
+    user_id : int
     time: str
     city: str
     temperature: float

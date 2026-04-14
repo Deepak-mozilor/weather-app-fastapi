@@ -1,4 +1,3 @@
-import os
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -7,10 +6,11 @@ from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from jose import JWTError, jwt
 
 from weather.db.dao.user_dao import UserDAO
-from weather.db.models.user import User
+from weather.db.models.user_model import User
+from weather.settings import settings
 from weather.web.api.login.schema import UserLogin
 
-SECRET_KEY = os.getenv("SECRET_KEY", "")
+SECRET_KEY = settings.secret_key
 ALGORITHM = "HS256"
 
 
